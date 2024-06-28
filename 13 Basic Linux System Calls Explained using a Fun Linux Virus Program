@@ -1,0 +1,234 @@
+If you are interested in writing Linux system programming, you should learn all the basic library/system calls. This article has an example C program that covers a set of system calls that will help you understand the usage of these basic library calls.
+
+The example C code given below does the following:
+Automatically opens up some terminals
+Displays the message that session is running as root or non-root
+Display the above message on all the open terminals
+
+The following are the 13 important library or system calls that are covered in the below example code.
+
+memset() : This function fills the first n bytes of the memory area pointed to by s with the constant byte c.
+fopen() : This function opens the file whose name is the string pointed to by its first argument and associates a stream with it.
+getcwd() : This function return a null-terminated string containing an absolute pathname that is the current working directory of the calling process
+getuid() : This function returns the real user ID of the calling process
+snprintf() : This function produces output according to a format and writes the output to a buffer.
+fwrite() : This function is used to write data to a stream
+fflush() : This function forces a write of all user space buffered data on to a particular stream
+fclose() : This function flushes the associated stream and closes the underlying file descriptor.
+system() : This function executes a command
+sleep() : This function makes the calling process sleep until specified seconds have elapsed or a signal arrives which is not ignored.
+opendir() : This function opens a directory stream
+readdir() : This function reads the directory which is opened as a stream
+atoi() : This function converts ascii argument to integer.
+The following is the C code that shows how to use all of the above 13 system calls.
+
+Code:
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+#include<unistd.h>
+#include<dirent.h>
+#include<sys/types.h>
+#include<pwd.h>
+
+// A buffer to hold current working directory
+char cwd[512];
+
+void inform(char *path, char *binary_name)
+{
+    // Declare variables for file operations
+    FILE *fp = NULL;
+
+    // A counter to be used in loop
+    unsigned int counter = 0;
+
+    // A buffer to hold the information message
+    char msg[1024];
+    // memset function initializes the bytes
+    // in the buffer 'msg' with NULL characters
+    memset(msg, '\0', sizeof(msg));
+
+    memset(cwd, '\0', sizeof(cwd));
+
+    // Check for the path to be non NULL
+    if(NULL== path)
+    {
+         printf("\n NULL path detected\n");
+         return;
+    }
+
+    // fopen will open the file represented
+    // by 'path' in read write mode.
+    fp = fopen(path,"r+");
+
+    if(!fp)
+    {
+        printf("\n Failed to open %s\n",path);
+        return;
+    }
+    else
+    {
+        printf("\n Successfully opened %s\n",path);
+    }
+
+    // getcwd() gives us the current working directory
+    // of the environemt from which this binary was
+    // executed
+    if(NULL == getcwd(cwd,sizeof(cwd)))
+    {
+        printf("\n Failed to get current directory\n");
+        return;
+    }
+
+    // getuid() returns the real user ID of the calling
+    // process.
+    // getuid() returns 0 for root and non zero for
+    // any other user.
+    if( 0 != getuid())
+    {
+        // This functions fills the buffer 'msg' with the formatted string by replacing %s in the harcoded string with the appropriate values
+        snprintf(msg,sizeof(msg),"\n\n\nYOU ARE NOT ROOT!!!!!");
+    }
+    else
+    {
+       snprintf(msg, sizeof(msg),"\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nYOU ARE ROOT!!!!!!!!!!!!!!");
+    }
+
+   // Make sure the information8 is printed 25 times on each
+   // open terminal
+   for(counter=0;counter<25;counter++)
+   {
+       printf("\n fwrite()\n");
+       // Write the information message on to the terminal
+       fwrite(msg, strlen(msg), 1, fp);
+       // Flush the message to the stdout of the terminal
+       fflush(fp);
+       // Wait for one second.
+       sleep(1);
+   }
+   // close the file representing the terminal
+   fclose(fp);
+
+}
+
+int main(int argc, char *argv[])
+{
+    // Since we will do some directory operations
+    // So declare some variables for it.
+    DIR *dp = NULL;
+    struct dirent *ptr = NULL;
+
+    // This variable will contain the path to
+    // terminal
+    char *path = NULL;
+
+    // Used as a counter in loops
+    int i =0;
+
+    // Step1 :
+    // Open 5 terminals each after 2 seconds
+    // of delay.
+    for(;i<5;i++)
+    {
+        // The system API executes a shell command
+        // We try to execute two commands here
+        // Both of these commands will open up
+        // a terminal. We have used two commands
+        // just in case one of them fails.
+        system("gnome-terminal");
+        system("/usr/bin/xterm");
+
+        // This call is used to cause a delay in
+        // program execution. The argument to this
+        // function is the number of seconds for
+        // which the delay is required
+        sleep(2);
+    }
+
+    // Give user some 60 seconds before issuing
+    // a information message.
+    sleep(60);
+
+    // Now, open the directory /dev/pts which
+    // corresponds to the open command terminals.
+    dp = opendir("/dev/pts");
+    if(NULL == dp)
+    {
+        printf("\n Failed to open /dev/pts\n");
+        return 0;
+    }
+
+    // Now iterate over each element in the
+    // directory untill all the elements are
+    // iterated upon.
+    while ( NULL != (ptr = readdir(dp)) )
+    {
+        // ptr->d_name gives the current device
+        // name or the terminal name as a device.
+        // All the numeric names correspond to
+        // open terminals.
+
+        // To check the numeric values we use
+        // atoi().
+        // Function atoi() converts the ascii
+        // value into integer
+
+        switch(atoi(ptr->d_name))
+        {
+            // Initialize 'path' accordingly
+
+            case 0:path = "/dev/pts/0";
+                   break;
+            case 1:
+                   path = "/dev/pts/1";
+                   break;
+            case 2:
+                   path = "/dev/pts/2";
+                   break;
+            case 3:
+                   path = "/dev/pts/3";
+                   break;
+            case 4:
+                   path = "/dev/pts/4";
+                   break;
+            case 5:
+                   path = "/dev/pts/5";
+                   break;
+            case 6:
+                   path = "/dev/pts/6";
+                   break;
+            case 7:
+                   path = "/dev/pts/8";
+                   break;
+            case 9:
+                   path = "/dev/pts/9";
+                   break;
+            default:
+                   break;
+         }
+         if(path)
+         {
+             // Call this function to throw some information.
+             // Pass the path to terminal where the information
+             // is to be sent and the binary name of this
+             // program
+             inform(path, argv[0]);
+             // Before next iteration, make path point to
+             // NULL
+             path = NULL;
+         }
+
+    }
+
+    sleep(60);
+
+    return 0;
+}
+
+The above code itself is self explanatory as it contains adequate comments that explains what those system calls does. If you are new to Linux system programming, this code gives enough exposure to the usage of all these important functions. For more details and advanced usage please read their man pages carefully.
+
+This code is a simulation of a fun basic virus program. Once you compile and execute the above c program, it will do the following. This code was tested on Linux mint. But, it should work on all the ubuntu derivatives.
+The user will see 5 terminals opening up one by one each after 1 second.
+While the user will be wondering what just happened, all of his open terminals will slowly start getting repeated information about the login being root or non-root.
+Please note that debug logging is enabled in the code for your learning purpose, please comment out the debug printf’s and then execute it if you want to have some fun.
+src:http://www.thegeekstuff.com
