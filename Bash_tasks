@@ -1,0 +1,134 @@
+
+#!/bin/bash
+echo "----------"
+echo "|Welcome!|"
+echo "----------"
+echo
+echo "Choose an option: "
+echo "[1] Change DNS server"
+echo "[2] Find host via DNS resolution"
+echo "[3] Show available network interfaces"
+echo "[4] Restart network interfaces"
+echo "[5] Trace the route to a host"
+echo "[6] Test open TCP port on a specified host"
+echo "[7] Update OS"
+
+read option
+if (( option == "1" ))
+then
+    echo "[*]Input the new DNS Server IP address: "
+    read dnsIP
+    echo $dnsIP
+# The IP addresses of your DNS servers are stored in resolv.conf
+    rm /etc/resolv.conf
+    touch /etc/resolv.conf
+    echo -e "nameserver \c" >> /etc/resolv.conf
+    echo $dnsIP >> /etc/resolv.conf
+    echo "[*]DNS server changed."
+    echo "[*]Printing DNS configuration file"
+    cat /etc/resolv.conf
+    echo
+    echo "[*]Do you want to test the new DNS server configuration?(Y/N)"
+    read response
+    if (($response = "y" )) || (($response = "Y" ))
+    then
+        echo "[*]What host do you want to ping?(ex:www.google.ca)"
+        read host
+        echo -e "[*]Pinging: \c"
+        echo $host
+        ping -c 2 $host
+    else
+        echo "[*]Bye.[*]"
+    fi
+fi
+if (( option == "2" ))
+then
+    echo "[*]Input host name: (ex: www.google.ca or 8.8.8.8)"
+    touch temp
+    read hostname
+# DNS resolution is done with nslookup
+    nslookup $hostname > temp
+    while read -r line
+    do
+        if [[ $line = *Address* ]] && [[ $line != *#* ]]
+        then
+            echo $line
+        fi
+        if [[ $line = *name* ]]
+        then
+            echo -e "Name: \c"
+            echo $line| cut -d ' ' -f 4
+        fi
+    done < "temp"
+    rm temp    
+fi
+if (( option == "3" ))
+then
+
+    echo "--------------------"
+    echo "Available Interfaces"
+    echo "--------------------"
+    echo
+    touch temp
+
+# Store network info in a temporary file
+    ip addr show > temp
+
+# Parses the file data and outputs the relevant info on the screen
+    while read -r line
+    do
+        if [[ $line = *\<* ]]
+        then
+        echo $line| cut -d' ' -f 2| cut -d':' -f 1
+        fi
+        if [[ $line = *inet* ]] && [[ $line = *host* ]] && [[ $line = *lo* ]]
+        then
+        echo -e "[*]IP Address:\c"
+        echo $line| cut -d '/' -f 1| cut -d't' -f 2
+        echo
+        fi
+        if [[ $line = *inet* ]] && [[ $line = *brd* ]]
+        then
+        echo -e "[*]IP Address:\c"
+        echo $line| cut -d '/' -f 1| cut -d't' -f 2
+        echo
+        fi
+    done < "temp"
+    rm temp
+fi
+if (( option == "4" ))
+then
+    echo "[*]---!!!WARNING!!!---[*]"
+    echo "[*]This may cause loss of internet connection!"
+    echo "[*]Do you wish to proceed restarting the network interfaces?(Y/N)"
+    echo
+    read answer
+    if (($answer = "y" )) || (($answer = "Y" ))
+    then
+# Restarting network interfaces, but I have observed that static routes may still persist
+        /etc/init.d/networking restart
+    echo "[*]Network interfaces restarted."
+    else
+        echo "[*]Bye."
+    fi
+fi
+if ((option == "5" ))
+then
+    echo "[*]Input the host name: (ex: www.google.com)"
+    read host
+# Nothing new here
+    traceroute $host
+fi
+if ((option == "6" ))
+then
+    echo "[*]Input host IP address: "
+    read host
+    echo "[*]Input port number: "
+    read port
+    timeout 1 bash -c "echo >/dev/tcp/$host/$port" && echo "[*]Port $port is open" || echo "[*]Port $port is closed"
+fi
+if ((option  == "7" ))
+then
+    echo "Updating OS: "
+    apt-get update && echo 'y' | apt-get upgrade    
+fi
