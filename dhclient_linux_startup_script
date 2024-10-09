@@ -1,0 +1,15 @@
+dhclient is the Dynamic Host Configuration Protocol (DHCP) Client one would use to allow a client to connect to a DHCP server.
+
+$ sudo nano /etc/rc.local
+
+#!/bin/bash
+dhclient
+exit 0
+
+$ sudo chmod 755 /etc/rc.local
+
+$ sudo systemctl enable rc-local
+
+$ sudo systemctl restart rc-local
+
+$ sudo systemctl status rc-local
