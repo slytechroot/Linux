@@ -1,0 +1,34 @@
+Linux Hacking Exposed - Notes 
+ Linux Hacking Exposed
+
+- attack NFS shares
+- SQUID proxy (attacking proxy)
+- Windows X System TCP port 6000->6003
+xhost+
+- sniffers: tcpdump
+- vulnerable scripts: count.cgi, php.cgi, nph.cgi, nph-test.cgi
+- netstat -an command
+- nmap -sT -O localhost
+
+- setuserid programs run with the effective user ID that owns the file
+
+cp 'which id'
+chown root ./id
+chmod 755 ./id; chmod u+s ./id
+ls -l ./id
+id
+./id
+
+- find ways to abuse users with '.' in their PATH
+- passwords stored in user files
+- passwords stored in System Files
+ex: /etc/ppp/chap-secrets file
+/etc/wvdial.conf
+
+Sudo:
+- a tool for distributing administrative authority
+- using sudo, is possible to grant specific users the ability to perform specific administrative tasks that normally require ROOT access
+
+- symlink and hardlink attacks
+- wc -l /etc/shadow
+
