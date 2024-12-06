@@ -1,0 +1,8 @@
+dpkg
+
+I used to run Fedora, but I've switched to Ubuntu. Now everything uses dpkg so this is here to remind me how to investigate packages.
+
+    List Package Contents -- dpkg -L <package name>
+    Show Package Description -- dpkg -p <package name>
+    Show All Installed Packages -- dpkg --list
+    Show Which Package 'filepath' Belongs To -- dpkg -S filepath
