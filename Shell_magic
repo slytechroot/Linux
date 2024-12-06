@@ -1,0 +1,5 @@
+Shell Magic
+
+Rename the extension on a group of files -- ls *.ext | while read item; do mv "$item" `echo '$item' | sed 's/\.ext/.newext/'`; done
+
+Downcase all the filenames in a folder -- ls * | while read item; do mv $item `echo "$item" | sed 's/.*/\L&\E/'`; done
