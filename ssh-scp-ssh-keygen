@@ -1,0 +1,6 @@
+ssh,scp,ssh-keygen
+
+    ssh -L <localport>:<tunneled remote host>:<port on remote host> user@host -- The magical incantation for local port forwarding.
+    ssh -R <remoteport>:<tunneled local host>:<port on local host> user@host -- Basically the opposite of -L, a great way to get into a machine behind a firewall if you have local access. Just ssh out from it to your home computer, or a computer with ssh access. Leave the connection open and then tunnel right back in.
+    ssh-keygen -t rsa then scp ~/.ssh/id_rsa.pub to the host and cat it onto ~/.ssh/authorized_keys. Be sure the directory permission is 700!
+    ssh -L 5901:localhost:5901 <host> -- This will tunnel vnc via ssh. Very worthwhile.
