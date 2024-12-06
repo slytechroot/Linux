@@ -1,0 +1,24 @@
+Find
+
+Find is quite possibly the most important utility in any Unix admin's toolbox. I've listed some examples below. Read the man page for more information.
+
+Notice I've appended | tee ~/find.log to the end of each command below. It isn't necessary, but I really prefer to do this so that my search results get saved to a file I can work with later.
+
+In fact, a fun way to work with find is to create a shell function so that this always happens:
+
+function find {
+  /usr/bin/find "$@" | /usr/bin/tee ~/find.log
+}
+
+One last point...because of fuse, my home folder has recently become home to network and encrypted filesystems. Making -xdev the first option of the search expression avoids searching these filesystems.
+
+    Find all files modified exactly 24-hours ago in your home folder: find ~/ -mtime 1 | tee ~/find.log
+    Find all files modified within the last 24-hours in your home folder: find ~/ -mtime -1 | tee ~/find.log
+    Find all files modified within the last 5 hours in your home folder: find ~/ -mmin -$((60 * 5)) | tee ~/find.log
+    Find all regular files which have any of their execute bits set: find ~/ -perm -ugo=x -type f | tee ~/find.log
+    Find all directories missing any of their execute bits: find ~/ -perm +ugo=x -type d | tee ~/find.log
+    Find all jpeg files regardless of case: find ~/ -regex '.*\.[jJ][pP][eE]*[gG]' | tee ~/find.log
+    Find all broken symbolic links: find -L ~/ -type l
+    Prune (ignore) part of a directory tree: find ~/ -path ~/'folder*' -prune -o (actual search here)
+    Find all backup files older than two weeks and delete them: find ~/ -name '*~' -type f -mtime +14 -exec rm {} \; | tee ~/clear.log
+    Only search the current folder: find ~/ -maxdepth 1 (search goes here) | tee ~/find.log
