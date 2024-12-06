@@ -1,0 +1,5 @@
+Wget
+
+    wget --no-host-directories/-nH I think this is an annoying default, but it does help keep things a bit safer and accounted for.
+    wget -m for mirror mode. If I'm pulling down more than one thing off the web I generally use this.
+    You almost always want to call wget with -np which stands for No Parent and means that you don't recurse higher than the first directory fed to wget. Trust me on this one, it can be very bad.
