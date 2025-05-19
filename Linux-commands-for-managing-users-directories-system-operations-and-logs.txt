@@ -1,0 +1,92 @@
+🍓 Useful Linux Commands for Managing Users, Directories, System Operations, and Logs
+
+ 🍓 Create a Directory Without a Name  
+To create a directory without a name, use the following command:  
+$ mkdir /tmp/" "
+
+ 🍓 Create a Directory with -name (Ignore - with --)  
+To create a directory with -name (and ignore any potential conflicts with command options), use:  
+$ mkdir -- "-name"
+
+ 🍓 Create User  
+There are two commands to create a user:
+
+- useradd: A low-level command available on all Linux distributions, but it requires additional parameters to fully set up the user account.  
+  Example:  
+ 
+  useradd username
+  
+
+- adduser: A higher-level command with more interactive prompts, but not available on all distributions. It simplifies the user creation process with default settings.  
+  Example:  
+ 
+  adduser username
+  
+
+ 🍓 Create a Group  
+You can create a group using either of these commands:
+
+- groupadd: Available on all Linux systems, but it is not as interactive.  
+  Example:  
+ 
+  groupadd groupname
+  
+
+- addgroup: More interactive and shows output to confirm actions.  
+  Example:  
+ 
+  addgroup groupname
+  
+
+ 🍓 Change Password  
+To change a user's password, use the passwd command:  
+$ passwd username
+
+ 🍓 Delete User  
+You can delete a user with:
+
+- userdel: Deletes a user and their files (use -r to also delete the user's home directory).  
+  Example:  
+ 
+  userdel -r username
+  
+
+- deluser: Deletes a user without deleting their files.  
+  Example:  
+ 
+  deluser username
+  
+
+ 🍓 Switch User  
+To switch users in the terminal:
+
+- su user: Switch to the user, but keep your current home directory.  
+  Example:  
+ 
+  su username
+  
+
+- su - user: Switch to the user and load their .profile, changing the home directory to theirs.  
+  Example:  
+ 
+  su - username
+  
+
+ 🍓 Top 10 Changes After Creating a User with useradd
+
+1. /etc/passwd: Contains information related to the user.
+2. /etc/shadow: Stores the user's password in an encrypted form.
+3. /etc/group: Creates a group associated with the user's name.
+4. /etc/gshadow: Stores the group’s password.
+5. /home/username: Creates the user's home directory.
+6. /etc/security: Specifies the limits for users, such as restricting access to other users' files in /home/.
+7. /var/spool/mail/username: Creates a mailbox for the user.
+8. /etc/skel: The skeleton directory where files shared with new users can be stored.
+9. PATH: The echo $PATH command gives access to system paths to run commands.
+10. Syscall: When a user executes a command, the kernel executes a system call to return the required data.
+
+ 🍓 Create a Symbolic Link (Symlink)  [Download 100+ commands] more here... 
+
+Let me know if you need more details or help with anything else!
+
+
