@@ -1,0 +1,279 @@
+  +----------------------------------------------------------------+
+  |                                                                |
+  |   VI DOCUMENTATION                      ver1,rev3              |
+  |                                                                |
+  |            By: Greg Eva                                        |
+  |            On: March 19 1997                                   |
+  |                                                                | 
+  +----------------------------------------------------------------+
+
+
+About VI
+--------
+
+	Vi is a very complex text editor for the UNIX operating system. 
+It uses an external program called ex, the line editor.  VI seems
+very basic to the novice user but once you learn more about it you
+find that the possibilities are endless (almost).  Also it is nice
+because the commands for vi can be used other places too, ie; ksh,
+tcsh, and the shed (stream editor) are somewhat alike also.  There 
+are different versions of vi.. as any program.  But since vi is for
+UNIX.. and there are hundreds of different kernels for UNIX.. there
+are also many different vi's (you can also get a vi for the PC called
+elvis).  Anyway, shall we begin our journey into the unknown.
+
+
+Different Modes
+---------------
+
+	First of all lets start off by learning the different modes that
+vi has.  First of all there is command mode.  This is where vi will
+be when you start it.  This is where you can scroll around with your
+cursor.. do fun stuff like adding a mark, deleting a character.. 
+whatever.  Secondly we have super-command mode.  This is a great
+place to do extremely long and advanced commands like global search
+and replaces.  It is nice because you can put commands together to
+do stuff.. like you can say; change the case of the first word on 
+the line between lines 25 and 62.  To get into super-command mode
+from command mode, you just type : (shift ;).  Last, but probably 
+the most important is the input mode.  Input mode is for actually
+inputing from the keyboard (or stdin) to the file (duh!).  This
+is were you type basically.  That's pretty much all you need to 
+know about input mode for now.  Here study the following commands.
+
+	i - puts you in input mode, will input before the current cursor
+	    position.
+	I - puts you in input mode at the beginning of the line.
+	o - puts you in input mode, but creates a new line below the one
+	    you are on, and moves the cursor there.
+	O - input mode.. creates a new line, but above the current 
+	    position instead of below.
+	a - input mode, and moves cursor after the current cursor position
+	A - input mode, after last character on the line
+	
+NOTE: to get out of input mode to command mode, just hit escape.
+
+
+Cursor Movement
+---------------
+
+	In vi  the most common way to move the cursor around is to use
+the arrow keys.  However, they don't always work.  For instance, 
+you are telneting to various universities across the nation,
+routing through as many subnets you can so that if someone tries
+to find out where you are.. it would take them awhile!  Anyway...
+you go to modify someone's .plan (file that is displayed when
+fingering someone) and put something witty in it.  But you find
+that the cursor keys just echo a bunch of crap... so here is an 
+alternative.
+
+	UP    - k
+	DOWN  - j
+	RIGHT - l
+	LEFT  - h  
+
+	There are also many other types of cursor movements that you 
+can use in vi.  Here is a list of some of the more common ones.
+
+	$ - move cursor to the end of the line
+	0 - move cursor to the beginning of the line
+	w - move cursor one word to the left (until next non-letter)
+	W - move cursor one big word to the left (until next whitespace)
+	e - moves to the end of the word
+	E - moves to the end of a big word
+	fc- finds the character <c>, up to and including
+	tc- finds the character <c>, up to but not including
+	b - backwards one word
+	B - backwards one big word
+	nG- goto line number n (G takes you to EOF)
+	
+NOTE: you must be in command mode or super-command mode for any of
+      these to work.
+
+
+Character Manipulation
+----------------------
+
+	While in command mode there are a few commands that you can do 
+to simplify your life.  Say you forgot to capitalize something... 
+no problem.. just put the cursor over that letter and change away!
+Here is a small list of commands that can be used.
+
+	r - replace character that the cursor is on, then back to
+	    command mode.
+	R - replace as many characters as you want (typeover)
+	s - substitute the character, but then go into input mode.
+	S - substitute the whole line
+	x - delete the current character (cut it to buffer)
+	X - delete the character before current cursor position
+	~ - toggle the case of the character that I am over top of
+	
+ 
+Using The Buffer
+----------------
+
+	Like in Windoze.. you can copy stuff to the 'clipboard'.  This
+is actually done every time you delete something.  You can use this
+feature along with many others (like all vi commands) to make your
+life easier.  For instance, mark some text, delete it, then move
+to where you want to put it.. and paste it.  Here are some basics 
+on how the buffer, cut, copy and paste work.
+
+	cy- yanks (copy) the selected region, where c is the command
+	yy- yanks an entire line
+	p - pastes after cursor position
+	P - pastes before cursor position
+	cd- where c is a command to use, cuts selection
+	dd- cuts the current line out
+
+Here is a example on how to cut out a word in command mode.
+
+dw
+
+It says delete the word.  Or you can be a little mode complex and
+say something like...
+
+4db
+
+That says delete four words to the left.  Also this can be used on
+the super-command mode to have some fun.
+
+:'m,.y
+
+Says, yank from my mark 'm' to the current position.
+
+
+Setting Marks
+-------------
+
+	A 'mark' is used to remember a certain line number of a file. 
+Marks can be set from A-Z and 0-9, by pressing m, then the mark you
+wish to set(in command mode).  It doesn't really matter what letter you
+choose.. it should be easy to remember so if you have a lot of them
+you wont get too confused.  To go back to the place that you set 
+the mark, in command mode, you type 'n, where n is the letter of
+the mark that you used.  Marks can also be used in super-command
+mode.  The syntax is still 'n, but if you use 'a,'b.. it tells vi
+that you want to do something between those lines.  for example the
+following would delete a range of lines. 
+
+:'m'nd
+
+	That would delete all the lines, including the marked lines, between
+two marks.  Another way to do this would be to go to the first line.. 
+then set a mark, then go to the line where you want to delete up to, 
+and do something like this.
+
+:'m,.d
+
+This says delete from tag m to my current position.
+
+TIP: when using unix, the file ~/.exrc is executed each time vi is run.
+     try adding some super commands in here like maps and sets
+ 
+
+Search & Replace
+----------------
+
+	There are a few ways to search for something using vi.  You can do
+it different ways too.. pay attention while I type it out! Note that all
+of these can only be used in super-command mode.
+
+	/string - searches down the file for the word string
+	?string - searches up the file for the word string
+	      / - searches for the last / word you searched for
+	      ? - searches for the last ? word you searched for 
+	      n - finds the next word
+	      N - finds the next word in the other direction
+ 
+	The replace function in vi is also VERY useful because as with all
+other vi commands, you can mix and match it with other commands.  So you
+could search and replace the document, or jus a few lines.  Also this
+must be typed in super-command mode.
+
+        :s:searchtext:replacetext:g
+
+	In this example, s says to search for searchtext, and replace it with
+replacetext.  And the g says to do it globally.  Instead of using g, you can
+also use c, for confirm, this will ask you each time if you want to replace
+it.  In this example you will see the :, that is called the delimiting 
+character, it can be pretty much any character as long as it doesn't show
+up in the search string or the replace string. For example.. this would work 
+too(the % says the whole file).
+
+	:%s(searchtext(replacetext(c
+
+	Here, the % says to do this for the whole file.  Instead of using 
+that I usually use marks or line numbers.  If you were doing this in just a 
+selection you could do it differently...
+
+	:'m,.s"^"#"g
+
+	This is a nice way of commenting out a block of source code if you
+do any programming.  The ^ says to replace the beginning of the line with
+the # sign (which means comment in unix).  Here is something I do to emails
+that I get that have been quoted over and over and have a million >>>>'s.
+
+	:%s/^>>>//g
+
+
+Misc Command
+------------
+
+	There are also a bunch of nice things that I couldn't find a place
+for.. so they are gonna go in here.  Some of these can be used in super-command
+mode also.
+
+	% - find matching bracket
+	. - repeats the last command you did
+	>>- moves the current line right one tab
+	<<- moves the current line left one tab
+	ZZ- quick save and exit
+	#c- where the # is a number, and c is a command.  It will do that
+	    command that many times.
+	
+TIP: using :wq will also save, then quit
+
+
+Misc Super-Command
+------------------
+
+	There are also many super-command line commands.  Actually there
+are millions because on the super-command line you can mix and match different
+commands.  Anyway, here are some that haven't been mentioned yet.
+
+        quit or q - quit
+       write or w - write file
+        edit or e - open file
+        read or r - read in a specified file
+      something+! - do it anyway, for example if you say quit without saving
+                    it wont let you, but if you do quit! it will quit without
+                    saving  	
+                n - where n is a number, goes to that line
+                ! - says shell, example.. !ls (!dir /w) would shell that
+                | - pipes the file to something like a spell checker, more..
+ set noautoindent - set no autoindent, this keeps you at the position you
+                    were at at the beginning of the line after <CR>'s
+        set lines - lets you set the amount of lines you are using
+      set columns - lets you set the amount of columns
+   set ignorecase - ignores the case of the string during searches
+    set tabstop=n - sets the amount of spaces for tab to be, n is the number
+   set nowrapscan - long lines will not be displayed on the next line
+     set showmode - will tell you whem you are in input mode
+       set redraw - redraws the screen when scrolling 
+          set all - displays all options that can be set
+          map c s - maps the character c with an s... ex; map q :quit^M
+                    says if I press q, goto s-command mode and quit 
+
+NOTE: when using set, you can usually use 'no' in front of the command.
+
+TIP: if you do e! it will reopen the file you are working and revert to the
+     the last time you made changes.
+
+
+
+	This file is intended for informational use only.  Please distribute
+it to all your friends and support UNIX.  If you have any questions, comments
+or anything you want to add to this file, please e-mail me at;
+
+	Greg Eva	eva@waterloo.hp.com

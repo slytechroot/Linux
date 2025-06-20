@@ -1,0 +1,377 @@
+		 =====           =====
+		=     =         =     =  =    =  ======  =       =
+		=               =        =    =  =       =       =
+		=        =====   =====   ======  =====   =       =
+		=                     =  =    =  =       =       =
+		=     =         =     =  =    =  =       =       =
+		 =====           =====   =    =  ======  ======  ======
+
+		-------------------------------------------------------
+
+
+				By; Greg Eva
+
+About
+-----
+
+	Csh (sea-shell) is one of the many different shells that comes with
+UNIX.  You can find CSH on any POSIX compliant system, and will probably
+be in the directory /bin/csh.  Csh is a command line interpreter 
+designed to incorporate job control facilities for unix's great
+multitasking architecture, a command history buffer to make
+reviewing command easy (UNIX equivalent to DosKey), and a C like
+command syntax to make it easier for C programmers to use, and make
+C-like shell scripts.
+
+Command Options
+---------------
+
+	SYNOPSIS:  csh [-cefinstvxTVX] [command_file] [argument_list ...]
+
+	-c	Read commands from the following argument
+	-e	Exit C-shell if a program exits with a non-zero
+	-f	Don't execute the config file ~/.cshrc, loads faster
+	-i	Interactive response, usually is interactive from a computer
+	-n	No execute, just parse commands, good for checking syntax
+	-s	Get shell input from the standard input (stdin)
+	-t	Read and execute a single line of input
+	-v	Set the verbosity of the shell, echo all commands to stdout
+	-x	Set the echo shell variable, echo all commands to stderr
+	-T	Disable some features such as double esc filename completion
+	-V	Set the verbosity of the shell before .cshrc is executed
+	-X	Set the echo shell variable before .cshrc is executed
+
+Redirecting and Piping
+----------------------
+
+	Standard input and output redirection is another nice thing that
+you can do in unix.  To do this you need to use the greater than 
+symbol on the command line.  You can also do this in DOS, however in 
+DOS, input redirection doesn't always do what it should.  An example 
+of output redirection in DOS would look something like this...
+
+	ls -l > tmp.dir
+
+This would create a file called tmp.dir with the contents of the dir.
+Nothing would have been printed to the screen.  This is called redirection
+because it has redirected the output going to stdout (the screen) and told
+it to go to the file instead. 
+
+	Standard input redirection would mean that, instead of taking the 
+input from the keyboard, take the input from the device, or file that
+has been specified.  This is accomplished by using the less than symbol
+(<) instead of the greater than symbol.  I like to use this technique in 
+shell scripts, which we will get into later. Lets say we have a file called 
+'password' with my password in it.  Here would be an example; 
+
+	rlogin `hostname` -l $USER < password
+
+In this example, the `hostname` says to run hostname, and sub in the return
+value of that between the `'s (this just says log me into the host I am on
+already).  The -l says I wanna login as user.. and the $USER is a shell
+variable that hold your username.  So basically it takes your password
+from the file, and that file will be the stdin for that program until it
+terminates, or is terminated.
+
+	Another way of output redirection would be using the double greater
+than symbol (>>).  What this tells our command line interpreter is that
+we want to redirect the output from stdout to the specified device or
+filename, and append to the end of it.  Example;
+
+	cat /etc/motd >> ~/system_messages
+
+Now this would type the message of the day and append it to the file
+called system_messages in your home directory.  Why you would want to
+do this, I don't know.. but it would work.
+
+	Now another fun way to use the outputs and inputs of programs is
+to use a little character called a pipe.  The pipe looks like this (|) and
+is found on the backslash key.  Now what the pipe does, is it takes the 
+output of one program, and sends it to another.  Here is an example.
+
+	ps -fu eva | grep hpterm | grep -v grep
+
+Looks weird eh?  Well here's what it does.  The first segment say go
+find out all the processes that the user eva is running and send them
+to the stdout.  The second part, takes it's output and  says.. hmm.. he
+wants me to send any lines that have the word 'hpterm' in it, to the 
+standard output.  The third section takes what the second segment said,
+makes sure that the word 'grep' isn't on any lines, and sends the output 
+to stdout (now being the screen).  So you just listed all of the hpterms
+that the user eva is running.
+
+Here is an example of how you can use the pipe as data manipulation.  What
+it will do (I hope), is take the a directory list, and strip off everything
+but the file sizes.
+
+	ls -l | grep -vi 'total' | awk '{print $5}' 
+
+Yeah, it works.  Anyway, the grep in there says don't print the first line
+then the awk says take the 5th field and print it up all nice!  As you can
+see, using pipes is a very important part of making shell scripts.
+
+You can also pipe to things like more, or less.  That way the output can be
+controlled so it doesn't go too fast.  You can pretty much pipe to anything.
+
+	cat ~/.cshrc | less
+
+	ypcat services | tee ~/services
+
+The second example here prints a list of all the different ports and such, and
+pipes it to tee.  Tee is neat because it redirects the output to a file, but
+also to the screen so you can see, nice for doing inputs and say a telnet log.
+
+Job Control
+-----------
+
+	I have to say one of my favorite things about UNIX is it's amazing
+multitasking ability.  Because all of the programs are run on the server,
+and not on the actual xterminal, the computers don't have to be as good,
+and the network capabilities are drastically increased also.  However,
+UNIX servers have to be pretty good for the system to run smoothly.
+By saying good, I mean it should have lots of RAM (~124M) for handling
+all of the server run applications, and lots of CPU speed (200MHz) to 
+get the job done quickly.
+
+	There are many different ways to utilize the great abilities of the 
+multitasking architecture.  Probably the most common in a business or
+school lab environment most of the multitasking would be done in something
+called X-Windows.  Xwindows is similar to Windows as it was a GUI and a
+point and click interface.  However the UNIX Xwindows system is largely
+oriented around the shell.  There are applications that you can run that have
+a GUI, but I find the most powerful way to work is directly at a command 
+prompt.  In say a remote access dial-in setup the way you would multitask
+takes a bit more skill, and isn't needed as much, but you can still do the
+things you need to do and have programs running in the background.  Now I 
+shall go over some of the basic job control commands and hotkeys.
+
+First and probably the most important is knowing how to pause the program 
+you are running, and tell the server to launch something else for you. 
+How we do this is by pressing Ctrl-Z.  This suspends all that the program
+is doing until it gets a further instruction.  Here would be an example 
+output if I were to suspend a running vi session.
+
+Suspended
+{130}hppadad>
+
+Now the user is back at the prompt and can proceed to do things other than
+what they were just doing.  But first of all, say the task that we suspended
+was supposed to be doing a calculation or something, we should get it going
+first.  To do this, we have a number of choices.  We can use the percent (%)
+symbol to distinguish different running jobs.  The default job would be %%,
+or %1.  To bring our vi session back to the foreground we could either type
+one or the other.  Or.. you could use the shell built-in command called fg.
+Fg will bring the specified job to the foreground.  If no job is specified,
+it uses the default job (%% or %1).  Here would be some examples;
+
+{130}hppadad>fg %1
+
+	OR
+
+{130}hppadad>%%
+
+Now these commands will bring the running job back to the foreground, but
+say we wanted to throw it into the background.  This is where the shell
+built-in bg and the suffix & come in handy.  Bg, is used the same way as
+fg is, so we can just substitute bg for fg.  But the & is a new one.. so
+here is what it does.  If you run a program with a & at the end of it, this
+tells the shell that you wish to start running this in the background.
+Here is a sample output if I run something followed by a &.
+
+[1] 23429
+{136}hppadad>
+
+Here, it has brought us back to the prompt.  But I bet you are wondering 
+what that number is.  Well, the number in square brackets is the job number
+(%1), and the other number is called the PID (Program Identification).  We 
+will discuss the PID more later.  Also, say we had suspended a job, we could
+put it in the background by doing one of the following;
+
+{136}hppadad>bg
+
+	OR
+
+{136}hppadad>%% &
+
+They both do the same thing, but the second one definitely looks cooler!
+
+	Now that we know how to change focus of jobs, we should probably learn
+how to see what is running that we don't know about.  This is where the command
+ps and shell built-in jobs come into play.
+
+Jobs is very easy to use, it displays a list of the current jobs running, their
+task number, their PID, their name, their state, sometimes even the working
+directory if you use the -l option.  Here is an example.
+
+[1]    Running                netscape
+[2]  - Suspended              vi vi.doc
+[3]  + Suspended (tty input)  grep fail
+{141}hppadad>
+
+Here, netscape is running smoothly in the background, vi is suspended and
+can't do anything.. and so is grep, except the reason grep has stopped is
+because it requires an input from the stdin.  Since its in the background, 
+it's not gonna get one, so it suspends itself.
+
+Ps is another way of displaying running programs.  However, unlike jobs, ps
+displays all programs, not just ones that are suspended or in the background.
+Also another nice thing about ps is that it is for everyone logged onto the
+current server.  And you can display things with different levels of info, and
+for different users.  Let me just tell you a few of the options I use with 
+ps.  First there is the -ef option, this says display every bit of info that
+you can, including PID, PPID, idle time, start date, command line and user.
+Secondly there is the -fu option.  This is the same as the -ef but after the 
+-fu you put a username, and it will only print the results for that user.
+The -u does the same thing as -f except you can choose the user.. and it
+isn't that much data.  Here are a few simple examples of ps.
+
+{158}hppadad>ps -fu eva
+     eva  2390  2387  0  Mar 29  ttyp5    0:00 /usr/local/bin/tcsh
+     eva 23547  2388  7 23:18:08 ttyp1    0:00 ps -fu eva
+     eva 21838     1  0 15:36:38 ?        0:03 hpterm
+     eva 23389  2390  0 22:19:59 ttyp5    0:01 vi csh.doc
+     eva  2061     1  0  Mar 29  ?        0:13 hpterm
+{159}hppadad>ps -f
+     UID   PID  PPID  C    STIME TTY      TIME COMMAND
+     eva  2388  2384  0  Mar 29  ttyp1    0:01 /usr/local/bin/tcsh
+     eva 22308  2388  0 17:25:08 ttyp1    1:31 netscape
+     eva 23550  2388  6 23:20:52 ttyp1    0:00 ps -f
+{165}hppadad>ps -ef | grep /rlogin
+     lab 13176 13175  0  Feb 27  ttyp7    0:00 /usr/bin/rlogin hppadbp
+     lab 13177 13176  0  Feb 27  ttyp7    0:00 /usr/bin/rlogin hppadbp
+     eva 23561  2388  4 23:22:19 ttyp1    0:00 grep /rlogin
+
+Those are pretty self explanatory, but I guess I should tell you what that
+stuff means.  
+
+	UID     - This is the users ID who has run the program.
+	PID     - This is the program ID number (child)
+	PPID    - This is the parent program ID number (child's parent...)
+	TIME    - This is the time it has been idle (not in use)
+	STIME   -This is the time that the program was started
+	TTY     - The terminal that it is being run on
+	COMMAND - The command that was typed to invoke it
+	C       - The priority of execution (higher is less priority)
+
+	Ok, now that we know what is running, say we have a problem or something
+we'll want to shut down that program.  We do this with a kill command.
+Kill doesn't really do all that much, but it still comes in handy on occasion.
+It is fairly easy to use, and really only has three options that we will worry
+about.  First off, lets see what they are, -9, -3 and -1.  Here is a list of 
+what each signal means.
+
+	-1	Hangup
+	-2	Interrupt
+	-3	Quit
+	-4	Alarm
+	-5	Terminate
+	-6	Abort
+	-9	KILL!
+
+So if you were trying to kill, say process #21342, and it wasn't working, you
+can send these different signals.  The -9 is pretty harsh, but it works.  Here
+are some examples for you.
+
+{3}hppadad>kill %1
+
+{5}hppadad>kill -9 23198
+
+{6}hppadad>kill -9 -1
+
+hehe, I don't suggest using the last one.  It will terminate all your jobs on
+that server and log you out.  But as you noticed in the first example you can 
+use the %'s like in the fg and bg commands.
+
+Shell Built-Ins
+---------------
+
+	Like DOS has it's built ins, so does UNIX.  However UNIX has more.  An 
+example of a shell built-in in DOS would be dir, copy, cls, type, exit, if,
+set, del, rd, cd, ren, echo, ah.. that's all I can think of.  Anyway, you can't
+delete the shell built-ins, and you can't find them anywhere either.  Here
+is a list of some of Csh's shell built-ins.
+
+alias - Alone, displays all of the current aliases.  With an alias name, it
+displays the alias for that name.  With an expression, it sets the name to
+the expression.
+
+		alias <name> <expression>
+		ex;		alias ll "ls -l !*"
+
+unalias - undoes the changes that were done with alias.
+
+		unalias <name>
+		ex; unalias ll
+
+bg - puts the specified job in the background
+
+		bg <job>
+		ex; bg %%
+
+fg - puts the specified job in the foreground
+
+		fg <job>
+		ex; fg %1
+
+cd - changes the current directory.  Alone or with ~, changes to home directory.
+With ~, changes to users home directory. With a path, changes there.
+
+		cd <path>
+		ex; cd /usr/local/bin
+
+pwd - displays the current path
+
+		pwd
+		ex; pwd
+
+echo - Writes wordlist to the standard output.  With -n, no carriage return.
+
+		echo <-n> <wordlist>
+		ex; echo "`whoami`@`hostname`"
+
+exec - Executes the specified in place of the current shell
+
+		exec <command>
+		ex; exec ksh
+
+exit - Exits csh with a zero value errorlevel
+
+		exit <errorlevel>
+		ex; exit
+
+if - Executes command if expression evaluates true
+
+		if (<expression>) <command>
+		ex; if ( $1 == $2 ) echo "They are the same!"
+
+jobs - Lists all active jobs for current user
+
+		jobs <-l>
+		ex; jobs
+
+kill - Kills the specified job using it's PID
+
+		kill <-1234569> <PID>
+		ex; kill -9 625
+
+nohup - Ignore hangups for program command, wont terminate after logout
+
+		nohup <command>
+		ex; nohup make a_great_big_bomb_of_some_sort &
+
+repeat - repeats the command command, count amount of times
+
+		repeat <count> <command>
+		ex; repeat 30 ls -l
+
+setenv - Alone displays all environment variables.  With name and value, 
+sets the variable name with value.
+
+		setenv <name> <value>
+		ex; setenv DISPLAY hppadhkx:0.0
+
+source - Reads and executes commands from name
+
+		source <name>
+		ex; source ~/.cshrc
+

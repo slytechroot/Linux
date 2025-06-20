@@ -1,0 +1,84 @@
+
+	-= Changing System Settings =-
+
+													by; Greg Eva
+													on; Apr 1st 97
+
+Each user has some settings set for them when they are added to the network.
+These are...
+
+	-group name
+	-user name
+	-password
+	-default shell
+	-home directory
+	
+Now, sometimes you want to change some of these settings.  Unfortunately we
+can't change all of these because you would need superuser access.  But
+lets work on what we can change.
+
+	First off lets try and change our password.  There are two ways of 
+doing this, one is by using /bin/passwd, and the other is by using 
+/usr/bin/yppasswd.  The difference is that the yppasswd is for use with
+NIS (Network Information System) types of networks.  So pick one, and run
+it.  It is easy to follow, just asks you for a new password, and old one of
+course.
+
+	Next say we want to change our default shell in the master password file.
+To do this we will use a command called /usr/bin/chsh.  It is also easy to 
+use.. chsh <username> <newshell>.. here would be an example.
+
+	chsh $USER /bin/ksh
+
+	Now that was quite simple.  Now lets move onto changing the file attributes
+so that we can control access to our files.  To do this we are going to use
+a command called chmod.  If you do an ls -l, you will notice a bunch of strange
+-xrw-rw--rw-.. that type of thing.. well here is what it means.
+
+There are three different sections of access levels, they are 
+	-user
+	-group
+	-other
+They are commonly referred to as ugo (user,group,other)
+
+-rwxr-xr-x
+ | || || |
+  |  |  |
+  |  |  +-- These three bits are for the other section
+  |  +----- These three bits are for the group section
+  +-------- These three bits are for the user section
+
+Each of those sections has three bits, they are r, w, and x.  Which mean, read,
+write, and execute.  If someone has the r bit, they can read that file, if they
+have the w bit, then can write to it, if they have the x bit, they can run it,
+or cd to it if it is a directory.
+
+To assign the different bits, we use the letter of the section we want to 
+change, then a plus (+) or minus (-) depending we want to give the bit or
+take it away, the bit that we want to use, and finally the filename or 
+directory name.  Here would be a simple example to make a file read, write and
+executable by everyone.
+
+	chmod a+rwx test.txt
+
+	Say that you wanted to change the group of a file, ie give the file to 
+someone who was in a different group than you.  You would use the chgrp 
+program.  It works like this; chgrp <group> <file> .  Here would be an example.
+
+	chgrp hdw test.txt
+
+Now that file belongs to you, but in a different group.  I think there is some
+way of tricking the shell by making a script, then changing it's group to a
+group that you want to access.. then run the script and it will let you.
+
+	Anyway, moving right along.  Last but not least we have the chown command.
+Chown sounds really neat, and is used for changing who a file belongs to.  I 
+find this stupid, because if you change who it belongs to.. you can't get rid
+of it, or change it.  And once you have changed it to another user, you can't
+change it back!  But here is how it works, just like the chgrp.. you use chown
+and say chown <newusername> <filename>... ex;
+
+	chown eva *.*
+
+hehe.. k, that was my file on changing system settings.. 
+

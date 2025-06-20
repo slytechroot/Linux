@@ -1,0 +1,278 @@
+
+   .oO Basic UNIX Commands Oo.
+   ===========================
+
+							by; Greg Eva
+
+ls <options> <filemask>
+--
+
+	Displays the contents of the directories.
+
+options: -lRaF
+
+-l	: long format with user, group, size, attributes and date
+-R	: recursively list files
+-a	: all files
+-F	: display a slash after the directories
+
+cp <options> <source> <dest>
+--
+
+	Copies files from one place to another.
+
+options: -ifpR
+
+-i	: prompt user for confirmation
+-f	: force overwrite and without prompt
+-p	: preserve file attributes
+-R	: recursively copy files
+
+cd <path>
+--
+
+	Change to a different directory.
+
+options: 
+
+~	: change to home directory
+	: also change to home directory
+-	: change to the last directory you were in
+
+rm <options> <filelist>
+--
+
+	Removes files from the directories.
+
+options: -ifR
+
+-i  : prompt user before deleting
+-f  : force delete 
+-R  : recursively remove files
+
+rmdir <options> <path>
+-----
+
+	Removes a specified directory.
+
+options: -ifp
+
+-i	: confirm deletion
+-f	: override -i
+-p	: remove all parent directories until not empty
+
+pwd <-H>
+---
+
+	Displays the current path.
+
+options: -H
+
+-H	: forces pwd to display hidden directories
+
+mkdir <-p> <path>
+-----
+
+	Creates a directory.
+
+options: -p
+
+-p	: creates all directories within the structure
+
+mv <options> <source> <dest>
+--
+
+	Moves a specified list of files or directories.
+
+options: -fi
+	
+-i	: confirm
+-f	: override -i
+
+cat <filelist>
+---
+
+	Display a file or list of files.
+
+options: -s
+
+-s	: silent mode, no error messages
+
+more <files>
+----
+
+	Displays a file, pausing after one page.
+
+less <files>
+----
+
+	Displays a file or stdout, ability to scroll up or down
+
+head <file>
+----
+
+	Displays the first 10 lines of the file.
+
+tail <-f> <file>
+----
+
+	Displays the last 10 lines of the file.
+
+options: -f
+
+-f	: print new lines as they are appended
+
+vi <filename>
+--
+
+	Open filename in the vi text editor.
+
+type <command>
+----
+
+	Locates a command, alias, function, or shell built in
+
+grep <string> <files>
+----
+
+	Searches for string in files.  Can be used with stdout.
+
+clear
+-----
+
+	Clears the standard output device.
+
+man <command>
+---
+
+	Gives detailed help on pretty much any command.
+
+date
+----
+
+	Prints the current date, time and year.
+
+du <-s> <filemask>
+--
+
+	Prints the disk usage (in 1/2k blocks) in the specified path.
+
+options: -s
+
+-s	: just prints the total amount of blocks
+
+
+lpr <-dprinter> <file>
+---
+
+	Prints stuff.
+
+options: -d
+
+-d	: specifies the printer to use
+
+lpstat 
+------
+
+	Prints the printer queue for all of the available printers.
+
+cancel <-e> <printer>
+------
+
+	Cancels the print jobs on printer.
+
+options: -ea
+
+-e	: cancel everything
+-a	: cancel everything of mine
+
+
+MISC NETWORK
+============
+
+hostname
+--------
+
+	Displays the localhost name.
+
+who
+---
+
+	Displays the current users on-line.
+
+whoami
+------
+
+	Displays your username.
+
+who am i
+--------
+
+	Displays your username, login time, and terminal.
+
+domainname
+----------
+
+	Echoes the domain name o the stdout device.
+
+nslookup <address>
+--------
+
+	Looks up and decodes IP addresses and checks if they are valid.
+
+finger <user>
+------
+
+	Gets login name, real name, last login time for user.
+
+ping <server>
+----
+
+	Bounces 64 byte packets to server, checks reliability.
+
+telnet <address> 
+------
+
+	Opens a remote session to an inter or intra net site.
+
+rlogin <host> <-l username>
+------
+
+	Opens a remote login session.
+
+options: -l
+
+-l	: specifies a certain user, username
+
+remsh <server> <command>
+-----
+
+	Runs a remote shell, and command on server.
+
+rup
+---
+
+	Displays uptime and system stats for servers.
+
+
+talk <username>
+----
+
+	Open a double buffered chat with another user on the network.
+
+write <username> <message>
+-----
+
+	Write username a message.
+
+elm
+---
+
+	Easy to use mail program.
+
+ftp <address>
+---
+
+	Opens the ftp port on the server address.
+
+
