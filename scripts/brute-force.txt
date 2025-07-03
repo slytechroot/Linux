@@ -1,0 +1,175 @@
+#!/usr/bin/perl
+#Steghide must be installed for this script to work.
+#In Ubuntu etc just do a 'sudo apt-get install steghide'
+#If you're seeing a bunch of '0's being tried, your step is probably too large.
+#To do:
+#	+Finish commenting
+#	+Print run time in human readable format
+#	+Create new thread imediatley after one finishes instead of waiting for all $parallelism
+#	+Create Expect.pm thread for a nicer look
+#	+General code clean up
+
+use threads;
+use threads::shared;
+use Time::Local;
+use Getopt::Long;
+use Term::ANSIColor;
+
+my $step = 100;
+my $parallelism = 10;
+my $found : shared = 0;
+my $tested : shared = 0;
+my $count = 1 ;
+my $verbose;
+my $help;
+
+$SIG{'INT'} = 'INT_handler'; #Call our handler to close files before exiting when ctrl^c is pressed
+
+$arguments = GetOptions ("wordlist=s" => \$file,
+			 "image=s" => \$image,
+			 "parallelism=i" => \$parallelism,
+			 "step=i" => \$step,
+			 "verbose" => \$verbose,
+			 "help" => \$help);
+
+#If stegfile and/or wordlist weren't given, print help and exit.
+if(!$image || !$file || $help){
+	rtfm();
+}
+
+print color 'bold red';
+print "\n!WARNING!\n";
+print color 'reset';
+print  "Files with the same name as the hidden file will be automatically overwritten.\nYou should probably run this in an empty directory.\n\nPress Enter to continue...";
+$wait  = <>;
+
+#Open the wordlist and wordlist index
+open(FILE, "< $file")         or die "Can't open $file for reading: $!\n";
+open(INDEX, "+>$file.idx")         or die "Can't open $file.idx for read/write: $!\n";
+
+build_index(*FILE, *INDEX); #Build our wordlist index for easy line seeking
+
+@timeData = localtime(time);
+$time1 = join(' ',@timeData);
+
+print "\nStarting!\n\n";
+
+#Main loop runs until the end of the wordlist or the passphrase is found
+while(defined(line_with_index(*FILE, *INDEX, $count)) && !$found){
+	
+	#Create our worker threads
+	for($i = 1; $i <= $parallelism; $i++){
+		@thr[$i] = threads->create('do_crack', $i);
+	}
+	
+	#Join all our threads. Oddly this didn't work when it was in the same loop as create
+	for($i = 1; $i <= $parallelism; $i++){
+		@thr[$i]->join();
+	}
+	
+	#Incremenr our counter. 
+	$count = $count + $parallelism * $step;
+	
+	print $tested . "\n" . $count . "\n";
+}
+
+if(!$found){
+	print "Passphrase was not found :(\n";
+}
+
+
+
+
+sub do_crack{
+
+$nThread = @_[0];
+
+$offset = $step * ($nThread - 1) + $count;
+$finish = + $offset + $step;
+
+if($found){
+	threads->exit() if threads->can('exit');
+	exit();
+}
+
+while($offset < $finish && !$found){
+	if($line = line_with_index(*FILE, *INDEX, $offset)){
+		$line =~ s/\s+$//;
+
+		if($verbose){
+			print $nThread . ":[$offset]Trying: " . $line . "\n";}
+
+		$result = `steghide extract -sf $image -p "$line" -f 2>&1`;
+
+		if($result =~ m/extracted/ || $result =~ m/already/){
+			print "Got it! The passphrase is: $line\n";
+			print $result;
+			$found = 1;
+
+			@timeData = localtime(time);
+			$time2 = join(' ',@timeData);
+			print $time1 . "\n" . $time2 . "\n";
+		}
+	}else{
+		die "Offset out of range\n";
+	}
+	$offset++;
+	lock($tested);
+	$tested++;
+}}
+
+
+sub rtfm {
+	print "Just a simple multi-threaded script to bruteforce Steghide passphrases.\n";
+	print "Good luck! -Nevermore\n\n";
+	print "Options:\n";
+	print "	--image, -i		The stegfile you want to bruteforce (required)\n";
+	print "	--wordlist, -w		Path to your wordlist (required)\n";
+	print "	--parallelism, -p	Number of concurrent threads (default 10)\n";
+	print "	--step, -s		Number of words for each thead to test (default 100)\n";
+	print "	--verbose, -v		Prints every tested word with thread and try number info\n";
+	print "	--help, -h		What do you think you are looking at?\n\n";
+	print "Example usage: perl brute.pl -i steg.jpg -w words.txt -p 15 -s 75\n";
+	exit(0);
+}
+
+sub build_index {
+	my $data_file  = shift;
+	my $index_file = shift;
+	my $offset     = 0;
+
+		print "\nBuilding index. This could take a while for large wordlists.\n";
+
+		while (<$data_file>) {
+			print $index_file pack("N", $offset);
+			$offset = tell($data_file);
+		}
+}
+
+sub line_with_index {
+	my $data_file   = shift;
+	my $index_file  = shift;
+	my $line_number = shift;
+	my $size;		# size of an index entry
+	my $i_offset;           # offset into the index of the entry
+	my $entry;              # index entry
+	my $d_offset;           # offset into the data file
+
+	$size = length(pack("N", 0));
+	$i_offset = $size * ($line_number-1);
+	seek($index_file, $i_offset, 0) or return;
+	read($index_file, $entry, $size);
+	$d_offset = unpack("N", $entry);
+	seek($data_file, $d_offset, 0);
+	return scalar(<$data_file>);
+}
+
+#Interrupt handler: closes our wordlist before exiting
+sub INT_handler {
+	print "\nDying...\n";
+	$found++;
+	sleep(1);
+	close(FILE);
+	print "Goodbye!\n";
+	exit(0);
+}
