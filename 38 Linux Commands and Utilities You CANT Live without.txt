@@ -1,0 +1,80 @@
+38 Linux Commands and Utilities You CANT Live without 
+This guide contains most essential Linux commands. This Guide is designed specifically for Linux Managers and system administrators.
+Below are the 38 Linux Commands and Utilities:-
+1.  alias
+Using a shorter name instead of those name which are usually associated with such commands it is a simple way to run a command or a series of Unix commands.
+2.  apt-get
+A tool to automatically update a Debian Machine and install Debian programme/packages.
+3.  Aspell
+Designed to replace Ispell GNU Aspell is a free and open source spell checker. It can be used as a library or as an Independent spell checker.
+4.  bzip2
+Compressing and Decompressing is portable, fast at a high rate using bzip2
+5.  cat
+Displaying contents of a file is commonly used in cat. It is a Unix/Linux command which can read, modify and concatenate text files.
+6.  cd
+This command changes the current directory in Linux and it can switch between directories conveniently. In  MS-DOS, CD and CHDIR is similar to Cd.
+7.  cmp
+The basic job of cmp is to compare two files of any type and writes the result to the standard output. Reporting function acts when there is different between the byte and line.
+8.  date
+Date basically sets a systems date and time. It is more useful while taking output or print information when working in a script file.
+9.  declare
+Declare modifies properties of Variables and gives them attributes
+10.  echo
+It allows user to “echo” or repeat string variable to standard output.
+11.  enable
+It will stop or start classes or printers.
+12.  exec
+It replaces whatever is typed with the parent process.
+13.  export
+It converts a file into different format that the one in which it is currently. It can be accessed by any application that uses it format once the file is exported.
+14.  find
+It searched the directory tree to find particular group of files that meet specifed conditions, including name and type, –size and –exec.
+15.  free
+Displaying the total amount of free and used physical memory and swap space is done by Free.
+16.  gzip
+It is used for file compression, compressing web pages on the server. It is the GNU project’s open source program.
+17.  ifconfig
+It is used to configure the kernel-resident network interfaces. It is needed when debugging or when system tuning is needed.
+18.  less, more
+Displaying text files one screen at a time, less command lets an admin scroll through configuration and error log files.
+19.  locate, slocate
+It reads one or more databases and writes file names matching patterns to output.
+20.  man
+It is a short form of “manual”. Man allows user to display the user manual built into Linux distribution and format.
+21.  neat
+It helps admins to specify the information needed to set up a network card among other features.
+22.  nslookup
+It allows user to enter a host name and find corresponding IP address.
+23.  ping
+It helps user in verifying that a particular IP address exists and can accept requests.
+24.  read
+It is used to read lines of text from standard input and to assign values of each field in input
+25.  rsync
+Rsync is similar to rcp, but it has more options, it syncs data from one disk or file to another across a network connection.
+26.  screen
+It is a terminal multiplexer in which a user can use a single terminal window to run multiple applications or windows.
+27.  sdiff
+It finds differences between two files by producing a side-by-side listing indicating lines that are dissimilar.
+28.  shutdown
+It is command that turns off the computer and it can be combined with variables such as –h, for halt after shutdown, or -r, for reboot after shutdown.
+29.  sort
+It is used to sort lines of text alphabetically or numerically according to fields
+30.  sudo
+It allows a system admin to give certain users the ability to run some (or all) commands at the root level and logs all commands and arguments.
+31.  tar
+Creating archives from a number of specified files and extracting files from such an archive is easy with tar program.
+32.  TOP 
+Protocols for network performing distributed information processing in offices and displaying the tasks on the system that takes most memory is the function of TOP.
+33.  uname
+The function of uname is to display the name of the current operating system and printing information about the system.
+34.  uniq
+Removing or reporting duplicate lines and comparing adjacent lines in a file is the function of uniq.
+35.  vi
+A user can control the system by solely using the keyboard instead using a combination of mouse selection and keystrokes with vi.
+36.  wc
+Counting the number of words, lines and characters in text files and producing a count for multiple files is the function of wc.
+37.  whoami
+The function of whoami is to print or write the user login name associated with the current ID to the standard output.
+38.  xargs
+The Xargs builds, reads and executed arguments from standard input, in input the blank lines are ignored
+
