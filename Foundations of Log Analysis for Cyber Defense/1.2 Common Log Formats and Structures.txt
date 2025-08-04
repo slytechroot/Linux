@@ -1,0 +1,105 @@
+1.2 Common Log Formats and Structures
+Introduction
+
+Effective log analysis requires not only understanding what logs are, but also how they are structured. Logs come in many formats depending on their origin, such as operating systems, network devices, security tools, and web servers. A Blue Team analyst must be able to quickly identify the format of a log, parse its key fields, and extract relevant information for triage, detection, and investigation.
+
+Logs may be structured, semi-structured, or unstructured. The format used affects how easily logs can be ingested by SIEM platforms, parsed with tools, or correlated across systems.
+Log Format Categories
+
+    Plain Text Logs
+    Common in Linux systems and legacy applications. These are human-readable and line-oriented but often require regular expressions or tools like grep for parsing.
+    Key-Value Pair Logs
+    Each line contains space-separated key=value pairs. This structure allows basic parsing and filtering.
+    CSV Logs
+    Comma-separated values, useful for exporting and analyzing in Excel or ingestion by SIEMs.
+    JSON Logs
+    Structured logs used by modern applications and tools like Suricata, AWS CloudTrail, or Elastic Beats. Easily parsed by machines and log pipelines.
+    XML Logs
+    Less common today but still used in legacy systems and some enterprise software.
+    Binary Logs
+    Examples include Windows Event Logs (EVTX), which require special tools like Event Viewer or LogParser to read.
+
+Practical Examples by Format
+
+1. Plain Text – Linux Auth Log
+
+Jun 30 10:12:43 server sshd[1290]: Accepted password for admin from 192.168.0.12 port 50222 ssh2
+
+Key elements: timestamp, hostname, process (sshd), status message
+Use case: Authentication success, origin IP, user identity
+
+2. Key-Value Format – Systemd Journal Log
+
+MESSAGE=Failed password for invalid user test from 10.1.1.5 port 50022 ssh2
+PRIORITY=3
+SYSLOG_IDENTIFIER=sshd
+
+Use case: Useful in Red Hat-based systems using journalctl. Easier to extract specific fields.
+
+3. CSV Format – Firewall Log Export
+
+timestamp,src_ip,dest_ip,port,action
+2025-06-30 12:01:55,10.0.0.5,192.168.10.1,443,allow
+
+Use case: Easy import into SIEM or spreadsheets for analysis of firewall behavior.
+
+4. JSON Format – Suricata Alert
+
+{
+  "timestamp": "2025-06-30T12:04:11.482Z",
+  "event_type": "alert",
+  "src_ip": "10.10.10.10",
+  "dest_ip": "192.168.100.5",
+  "alert": {
+    "signature": "ET SCAN Nmap Scripting Engine",
+    "severity": 2
+  }
+}
+
+Use case: Structured format makes this ideal for parsing in SIEMs or log pipelines like ELK. Allows querying fields such as alert.signature or src_ip.
+
+5. XML Format – Web Application Firewall Log
+
+<event>
+  <date>2025-06-30</date>
+  <src_ip>172.16.0.8</src_ip>
+  <event_type>SQL Injection Attempt</event_type>
+</event>
+
+Use case: Some older or enterprise tools output XML. Requires XPath or similar methods for extraction.
+
+6. EVTX (Binary) – Windows Event Log
+Can be viewed using:
+
+    Event Viewer GUI
+    Get-WinEvent or wevtutil via PowerShell
+    LogParser or SIEM agent ingestion
+
+Example (Security.evtx, Event ID 4688):
+
+A new process has been created.
+New Process Name: C:\Windows\System32\cmd.exe
+Creator Process: C:\Windows\explorer.exe
+
+Use case: Detecting suspicious process execution like cmd.exe, powershell.exe, or rundll32.exe.
+Field Standardization and Normalization
+
+Since each log source has its own schema, one of the biggest challenges in centralized log analysis is normalization. This is the process of converting different log formats and fields into a common schema.
+
+For example:
+Raw Field (Vendor-specific)	Normalized Field
+src_ip, source-address, ip.src	source_ip
+username, user, acct	user_name
+timestamp, @timestamp, time	event_time
+
+This standardization is critical in SIEM platforms like Splunk, Elastic Security, or QRadar to build detection rules that work across multiple data sources.
+Practical Considerations for Blue Teams
+
+    Use parsing and enrichment tools like Logstash, Fluent Bit, or syslog-ng to convert and enrich log data.
+    Build dashboards based on normalized fields for cross-platform visibility.
+    Validate that log sources produce structured outputs whenever possible to ease correlation and search.
+    Understand how your SIEM ingests and parses each log type.
+
+Understanding log formats is a core skill for any Blue Team professional. Each source system, whether it's an operating system, firewall, or application, produces logs in its own format, and these formats directly affect how logs can be ingested, parsed, and analyzed.
+
+Being able to recognize and work with different formats such as plaintext, JSON, CSV, and binary (like Windows EVTX) is essential for building effective detection rules, hunting threats, and conducting forensic investigations. Additionally, the process of normalizing logs across different systems ensures that security operations teams can correlate events accurately and build scalable detection logic.
