@@ -1,0 +1,13 @@
+adduser sly
+(type password twice)
+
+#add user to sudo group
+usermod -aG sudo sly
+
+mkdir .ssh
+touch .ssh/authorized_keys
+<insert your public SSH keys>
+Save the file.
+
+................
+
