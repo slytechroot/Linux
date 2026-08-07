@@ -1,0 +1,42 @@
+🐧 Linux System Administration Cheat Sheet — 30 Commands You Need to Know
+
+A handy cheat sheet for system administrators, pentesters, and anyone working with Linux. Save it—you’ll use it every day.
+
+System management:
+systemctl status nginx     # service status
+journalctl -f -u ssh       # live systemd logs
+htop                       # interactive process monitoring
+df -h                      # free disk space
+du -sh /var/log            # folder size
+
+
+Networking and diagnostics:
+ss -tulpn                  # all listening ports
+ss -t state established    # active connections
+lsof -i :80                # process listening on port 80
+tcpdump -i eth0 -w dump.pcap  # traffic capture
+ping -c 4 8.8.8.8          # connectivity check
+
+Search and analysis:
+grep -r "password" /home/  # search across all files
+find / -name "*.log" -mtime -7  # files from the last 7 days
+find / -perm -4000 2>/dev/null   # SUID files (privilege escalation)
+
+Process management:
+ps aux | grep nginx        # search for a process
+kill -9 [PID]              # force termination
+pkill -f "python evil.py"  # kill by name
+nice -n 19 ./heavy.sh      # run with low priority
+
+Security:
+last -n 20                 # login history
+who                        # who is currently logged in
+sudo -l                    # commands allowed as root
+
+File operations:
+tar -czvf archive.tar.gz /path  # create an archive
+unzip archive.zip -d /dest      # extract
+rsync -avz /src /dest           # synchronize
+
+Save this to your notes—and stop Googling every 5 minutes.
+
