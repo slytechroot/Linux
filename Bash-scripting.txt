@@ -1,0 +1,322 @@
+ All that knowledge means nothing if you can't scale it. If you're doing everything manually, you're leaving money on the table. You're spending hours on repetitive tasks that could be automated in 10 minutes. You're burning out on boring work instead of saving your brainpower for the interesting stuff.
+
+I've been there. Running the same nmap scans manually. Grepping the same logs. Copy-pasting the same commands. It's exhausting and it's stupid.
+
+This post is about why automation matters and how to actually build bash scripts that make you faster, not just noisier.
+Part 1: The Automation Mindset
+
+Here's what I see all the time.
+
+Someone learns a few commands. They run them one by one. They copy the output to a text file. They move to the next target. Repeat.
+
+That's not automation. That's just being a slow human.
+
+Real automation means your machine does the work while you think. It means your recon runs while you sleep. It means your results are formatted and waiting for you when you wake up.
+
+The difference between a good hacker and a great one is how much they've automated. I've worked with pentesters who spend 80% of their time on manual repetitive tasks and 20% on actual hacking. The ones who actually find things? They flip that ratio.
+
+The thing is, bash scripting isn't just about running commands faster. It's about building a workflow that scales. When you're working on a single target, manual is fine. When you're working on 50 targets across a bug bounty program, manual is impossible.
+Part 2: What Bash Gives You That Other Languages Don't
+
+Everyone wants to write Python. And yeah, Python is great. But Python isn't always what you need.
+
+Bash is glue. It's the language that ties everything together. You have nmap doing scans, grep filtering output, curl making requests, and sed munging data. Bash is what connects them.
+
+Here's what I mean.
+
+Let's say you want to check if a list of hosts are alive. In Python, you'd write a script with subprocess calls, handle errors, manage output parsing. It'd be like 50 lines.
+
+In Bash:
+
+for host in $(cat hosts.txt); do
+
+if ping -c 1 $host &>/dev/null; then
+
+echo "$host is alive"
+
+fi
+
+done
+
+One line of loop, one line of ping, one line of output. That's it.
+
+Bash is also installed on every Linux machine. No dependencies to install. No virtual environments to set up. It just works. That matters when you're on a fresh Kali box or a compromised server and you need to move fast.
+Part 3: Building Your First Real Script
+
+Let me walk through building a real script that does something useful.
+
+I'm going to write a reconnaissance automation script. Nothing fancy. Just something that takes a domain and runs the initial discovery steps.
+
+Step 1: The Shebang and Help
+
+Every script starts with the shebang. It tells the system what interpreter to use:
+
+#!/bin/bash
+
+Then I add a help function. This is the thing people always skip and then regret:
+
+show_help() {
+
+cat << EOF
+
+Usage: $0 -d domain.com
+
+Automated reconnaissance for bug bounty hunting.
+
+-d Target domain
+
+-h Show this help
+
+EOF
+
+}
+
+Step 2: Parse Arguments
+
+Handling command-line arguments is clean and professional:
+
+while getopts "d:h" opt; do
+
+case $opt in
+
+d) DOMAIN=$OPTARG ;;
+
+h) show_help; exit 0 ;;
+
+*) show_help; exit 1 ;;
+
+esac
+
+done
+
+Step 3: Build the Output Structure
+
+I always create a consistent directory structure:
+
+OUTPUT_DIR="recon/$DOMAIN"
+
+mkdir -p "$OUTPUT_DIR"/{subdomains,urls,live,screenshots,notes}
+
+Step 4: Run the Recon Steps
+
+This is where it gets interesting.
+
+I gather subdomains from crt.sh:
+
+echo "Grabbing subdomains from crt.sh..."
+
+curl -s "https://crt.sh/?q=%25.$DOMAIN&output=json" | \
+
+jq -r '.[].name_value' | \
+
+sed 's/\*\.//g' | \
+
+sort -u > "$OUTPUT_DIR/subdomains/crt.txt"
+
+I check which ones are live:
+
+echo "Checking live hosts..."
+
+cat "$OUTPUT_DIR/subdomains/crt.txt" | \
+
+httpx -silent -status-code -title -tech-detect > "$OUTPUT_DIR/live/live.txt"
+
+I grab URLs from Wayback:
+
+echo "Grabbing historical URLs..."
+
+echo "https://web.archive.org/cdx/search/cdx?url=*.$DOMAIN/*&output=json&fl=original" | \
+
+gau > "$OUTPUT_DIR/urls/wayback.txt"
+
+Step 5: The Cleanup
+
+Finally, I save everything and print a summary:
+
+echo "Recon complete. Results saved to $OUTPUT_DIR"
+
+echo "Found $(wc -l < $OUTPUT_DIR/subdomains/crt.txt) subdomains"
+
+echo "Found $(wc -l < $OUTPUT_DIR/live/live.txt) live hosts"
+
+This is a simple script. But I can run it on any domain and get consistent results in minutes. That's the power of automation.
+Part 4: The Text Processing Trifecta (Grep, Sed, Awk)
+
+If you're going to script in Bash, you need to learn these three tools. They're the core of data manipulation in the terminal.
+
+Grep — Finding stuff in text.
+
+I use grep constantly. Finding IPs in logs, extracting subdomains from HTML, filtering out junk results.
+
+# Find all lines with "error" in a log file
+
+grep -i "error" /var/log/syslog
+
+# Extract all IP addresses from a file
+
+grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' file.txt
+
+# Find lines that don't contain "200 OK"
+
+grep -v "200 OK" access.log
+
+Sed — Replacing and transforming text.
+
+Sed is for stream editing. I use it to clean up output, change formats, and extract specific parts of lines.
+
+# Remove the asterisk from wildcard subdomains
+
+echo "*.example.com" | sed 's/\*\.//g'
+
+# Extract the domain from a URL
+
+echo "https://sub.example.com/path" | sed 's|https://||' | cut -d'/' -f1
+
+Awk — The heavy lifter.
+
+Awk is a complete programming language for text processing. It's useful when grep and sed aren't enough.
+
+# Print the second column from a CSV
+
+awk -F',' '{print $2}' data.csv
+
+# Sum the values in the third column
+
+awk '{sum += $3} END {print sum}' file.txt
+
+The real power is combining them. You pipe output from one tool to another, building up a processing pipeline. This is what makes Bash so powerful.
+Part 5: The Parallel Power
+
+Here's a pro tip: Bash can do things in parallel. That means you can run 10 nmap scans at once, or check 100 hosts at the same time.
+
+The xargs command is your friend:
+
+# Check 100 hosts in parallel
+
+cat hosts.txt | xargs -P 50 -I {} ping -c 1 {} > results.txt
+
+Or with a loop and background processes:
+
+for host in $(cat hosts.txt); do
+
+ping -c 1 $host &
+
+done
+
+wait
+
+The & puts the command in the background. The wait waits for all background jobs to finish. This is how you speed up scripts by 10x.
+Part 6: Building Custom Tools
+
+Here's where it gets creative. You don't just run scripts. You build tools that do exactly what you need.
+
+Custom Port Scanner
+
+Nmap is powerful, but sometimes you need something simpler. Here's a lightweight port scanner in Bash:
+
+#!/bin/bash
+
+TARGET=$1
+
+for PORT in {1..1000}; do
+
+timeout 1 bash -c "echo >/dev/tcp/$TARGET/$PORT" 2>/dev/null && echo "Port $PORT open"
+
+done
+
+This isn't as fast as nmap. But it's pure Bash and works on systems without nmap installed.
+
+Custom Directory Fuzzer
+
+Fuzzing endpoints is a big part of web testing. Here's a simple fuzzer:
+
+#!/bin/bash
+
+TARGET=$1
+
+WORDLIST=/usr/share/wordlists/dirb/common.txt
+
+while read DIR; do
+
+curl -s -o /dev/null -w "%{http_code} - $DIR\n" "$TARGET/$DIR"
+
+done < $WORDLIST | grep -v "404"
+
+It's crude. But it works. And you can extend it with headers, cookies, and other customizations.
+
+Custom Log Parser
+
+This is the one I use all the time:
+
+#!/bin/bash
+
+grep -E '" (POST|PUT|DELETE) ' access.log | \
+
+cut -d'"' -f2 | \
+
+cut -d' ' -f2 | \
+
+sort | uniq -c | sort -rn | head -20
+
+It shows the top 20 endpoints with the most POST/PUT/DELETE requests. Great for finding attack surface.
+Part 7: Living Off the Land
+
+Here's something most guides don't tell you about.
+
+When you're on a machine during a pentest, you can't always install tools. You're limited to what's already there. Bash, curl, wget, telnet, netcat—those are your weapons.
+
+I've been on engagements where I had nothing but Bash and netcat. I wrote scripts on the fly to enumerate systems, pivot to other hosts, and exfiltrate data. That's the difference between someone who knows tools and someone who knows the system.
+Part 8: The Scripts I Actually Use
+
+Here are the scripts I run every day. Nothing fancy. Just reliable workhorses.
+
+The Recon Runner
+
+I already showed this one. It takes a domain and runs the initial discovery steps.
+
+The Mass Scanner
+
+When I have a list of IPs and need a quick scan:
+
+#!/bin/bash
+
+while read IP; do
+
+nmap -T4 -F $IP -oG scans/$IP.txt &
+
+done < ips.txt
+
+wait
+
+The URL Extractor
+
+When I have a pile of HTML and need to find all the links:
+
+#!/bin/bash
+
+grep -Eo 'href="[^"]*"' input.html | cut -d'"' -f2 | sort -u
+
+The Result Comparator
+
+When I have two sets of subdomains and want to find new ones:
+
+#!/bin/bash
+
+comm -13 <(sort old.txt) <(sort new.txt)
+
+This shows lines in new.txt that aren't in old.txt.
+
+Bash isn't glamorous. It isn't fancy. But it's the foundation of every Linux system and the most practical automation tool you'll ever use.
+
+You don't need to be a shell scripting wizard. You just need to know enough to automate the boring stuff. Then you're spending your time on thinking, not typing.
+Resources I use:
+
+· grep, sed, awk — The core text processing tools
+
+· curl and wget — For making requests
+
+· jq — For parsing JSON (learn this, it changes everything)
+
+· xargs — For parallel execution
+
+· timeout — For limiting execution time 
